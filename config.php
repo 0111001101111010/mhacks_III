@@ -21,8 +21,10 @@
 $api_client_id = "59840552989-in9c4nhs59u5ammblfolv2qu16ira823.apps.googleusercontent.com";
 $api_client_secret = "jqORcnZA9Sq2qUM8u_xBt2LG";
 $api_simple_key = "AIzaSyCQpcwRX2oZxhYfZh0hTTLd1sQjQDZylU8";
+// this is mine 985802081765-511ieritceqs882g7q9fhodcjd5kq52n.apps.googleusercontent.com
 
-$base_url = "http://mateoj.com/mirror-php";
+$base_url = "http://localhost/~stanzheng/code/hacks/mhacks_III";
+//$base_url = "http://mateoj.com/mirror-php";
 
 // This should be writable by your web server's user
 $sqlite_database = "/tmp/database.sqlite";

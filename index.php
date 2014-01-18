@@ -57,6 +57,8 @@ switch ($_POST['operation']) {
     break;
   case 'insertItemWithAction':
     $new_timeline_item = new Google_TimelineItem();
+
+    /*** inject query ***/ 
     $new_timeline_item->setText("What did you have for lunch?");
 
     $notification = new Google_NotificationConfig();
@@ -73,7 +75,8 @@ switch ($_POST['operation']) {
     $menu_item = new Google_MenuItem();
     $menu_item->setAction("READ_ALOUD");
     array_push($menu_items, $menu_item);
-    $new_timeline_item->setSpeakableText("What did you eat? Bacon?");
+    $new_timeline_item->setSpeakableText("What did you eat? Bacon?"); 
+    //read aloud is this different or same for all?
 
     $menu_item = new Google_MenuItem();
     $menu_item->setAction("SHARE");
@@ -116,26 +119,147 @@ switch ($_POST['operation']) {
       $message = "Sent a cat fact to " . count($credentials) . " users.";
     }
     break;
-  case 'insertSubscription':
-    $message = subscribe_to_notifications($mirror_service, $_POST['subscriptionId'],
-      $_SESSION['userid'],"https://mirrornotifications.appspot.com/forward?url=" . $base_url . "/notify.php");
+/** include cases here **/
+  case 'reminder':
+    $new_timeline_item = new Google_TimelineItem();
+
+    /*** inject query 
+
+    Build the Menu here
+    ***/ 
+    $new_timeline_item->setText("Archimedes");
+
+//use escapeSpecialchar(string) for other shipit
+//how to set 
+    $new_timeline_item->setHtml('
+<article style="left:0px;visibility:visible">
+  <section>
+    <div class="layout-two-column">
+      <div class="align-center">
+  <figure>
+    <img src="http://placehold.it/350x240">
+  </figure>
+      </div>
+      <div class="align-center">
+ <div class="text-auto-size">
+ <p class="yellow">6:00<sub>PM</sub></p>
+      <p>Have you taken your medication?<br></p>
+    </div>
+    </div>
+  </div></section>
+  <footer>
+    <p>Dose: 1 out of 3 </p>
+  </footer>
+</article>'
+
+);
+
+case 'reminderMedicine':
+    $notification = new Google_NotificationConfig();
+    $notification->setLevel("DEFAULT");
+    $new_timeline_item->setNotification($notification);
+
+    $menu_items = array();
+
+//how to set 
+    $new_timeline_item->setHtml('
+<article style="left:0px;visibility:visible">
+  <section>
+    <div class="layout-two-column">
+      <div class="align-center">
+  <figure>
+    <img src="http://placehold.it/350x240">
+  </figure>
+      </div>
+      <div class="align-center">
+ <div class="text-auto-size">
+ <p class="yellow">6:00<sub>PM</sub></p>
+      <p>Have you taken your medication?<br></p>
+    </div>
+    </div>
+  </div></section>
+  <footer>
+    <p>Dose: 1 out of 3 </p>
+  </footer>
+</article>'
+
+);
+
+    // A couple of built in menu items
+    $menu_item = new Google_MenuItem();
+    $menu_item->setAction("REPLY");
+    array_push($menu_items, $menu_item);
+
+    $menu_item = new Google_MenuItem();
+    $menu_item->setAction("READ_ALOUD");
+    array_push($menu_items, $menu_item);
+    $new_timeline_item->setSpeakableText("Answer me yes or no, or request to repeat");
+
+
+    $menu_item = new Google_MenuItem();
+    $menu_item->setAction("DELETE");
+    array_push($menu_items, $menu_item);
+
+  /*  // A custom menu item
+    $custom_menu_item = new Google_MenuItem();
+    $custom_menu_value = new Google_MenuValue();
+    $custom_menu_value->setDisplayName("Respond OK");
+
+    $custom_menu_value->setIconUrl($service_base_url . "/static/images/drill.png");
+
+    $custom_menu_item->setValues(array($custom_menu_value));
+    $custom_menu_item->setAction("CUSTOM");
+    // This is how you identify it on the notification ping
+    $custom_menu_item->setId("safe-for-later");*/
+    array_push($menu_items, $custom_menu_item);
+
+    $new_timeline_item->setMenuItems($menu_items);
+
+    insert_timeline_item($mirror_service, $new_timeline_item, null, null);
+
+    $message = "Inserted a timeline item you can reply to";
     break;
-  case 'deleteSubscription':
-    $message = $mirror_service->subscriptions->delete($_POST['subscriptionId']);
+
+case 'subscribeToService':
+  echo(  subscribe_to_notifications($mirror_service, "timeline",
+    $_SESSION['userid'], "https://mirrornotifications.appspot.com/forward?url=" .$base_url . "/notify.php"));
+
+break;
+
+
+
+/** before the end **/
+  case 'insertItemReminder':
+    $new_timeline_item = new Google_TimelineItem();
+
+    /*** inject query ***/ 
+    $new_timeline_item->setText("reminder");
+
+    $notification = new Google_NotificationConfig();
+    $notification->setLevel("DEFAULT");
+    $new_timeline_item->setNotification($notification);
+
+    $menu_items = array();
+
+    // A couple of built in menu items
+    $menu_item = new Google_MenuItem();
+    $menu_item->setAction("REPLY");
+    array_push($menu_items, $menu_item);
+
+    $menu_item = new Google_MenuItem();
+    $menu_item->setAction("READ_ALOUD");
+    array_push($menu_items, $menu_item);
+    $new_timeline_item->setSpeakableText("You should "); // edit this possibly 
+    //read aloud is this different or same for all?
+
+    $new_timeline_item->setMenuItems($menu_items);
+
+    insert_timeline_item($mirror_service, $new_timeline_item, null, null);
+
+    $message = "Inserted a timeline item you can reply to";
     break;
-  case 'insertContact':
-    insert_contact($mirror_service, $_POST['id'], $_POST['name'],
-        $base_url . "/static/images/chipotle-tube-640x360.jpg");
-    $message = "Contact inserted. Enable it on MyGlass.";
-    break;
-  case 'deleteContact':
-    delete_contact($mirror_service, $_POST['id']);
-    $message = "Contact deleted.";
-    break;
-  case 'deleteTimelineItem':
-    delete_timeline_item($mirror_service, $_POST['itemId']);
-    $message = "A timeline item has been deleted.";
-    break;
+
+// after the ned 
 }
 
 //Load cool stuff to show them.
@@ -162,7 +286,7 @@ foreach ($subscriptions->getItems() as $subscription) {
 <html>
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Glassware Starter Project</title>
+  <title>Archimedes Project</title>
   <link href="./static/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
   <link href="./static/bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet" media="screen">
   <link href="./static/main.css" rel="stylesheet" media="screen">
@@ -181,6 +305,10 @@ foreach ($subscriptions->getItems() as $subscription) {
   <?php if ($message != "") { ?>
   <div class="alert alert-info"><?php echo $message; ?> </div>
   <?php } ?>
+
+
+<!--  Beginnning of the actual code. Cool  -->
+
 
   <h1>Your Recent Timeline</h1>
   <div class="row">
@@ -220,12 +348,19 @@ foreach ($subscriptions->getItems() as $subscription) {
                   ?>
                 </td>
               </tr>
-              <tr>
                 <td colspan="2">
                   <form class="form-inline" method="post">
                     <input type="hidden" name="itemId" value="<?php echo $timeline_item->getId(); ?>">
                     <input type="hidden" name="operation" value="deleteTimelineItem">
                     <button class="btn btn-danger btn-block" type="submit">Delete Item</button>
+                  </form>
+                </td>
+              </tr>
+              </tr>
+                <td colspan="2">
+                  <form class="form-inline" method="post">
+                    <input type="hidden" name="operation" value="subscribeToService">
+                    <button class="btn btn-primary btn-block" type="submit">Subscribe to Service</button>
                   </form>
                 </td>
               </tr>
@@ -289,8 +424,13 @@ foreach ($subscriptions->getItems() as $subscription) {
           Insert a card to all users
         </button>
       </form>
+      <form method="post">
+        <input type="hidden" name="operation" value="reminder">
+        <button class="btn btn-block" type="submit">
+          Health Response Cards
+        </button>
+      </form>
     </div>
-
   <div class="span4">
     <h2>Contacts</h2>
     <p>By default, this project inserts a single contact that accepts
