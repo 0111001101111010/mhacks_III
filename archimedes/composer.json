@@ -1,0 +1,7 @@
+{
+
+	"minumum-stability": "dev",
+	"require":{
+		"sendgrid/sendgrid": "1.1.7"
+	}
+}
